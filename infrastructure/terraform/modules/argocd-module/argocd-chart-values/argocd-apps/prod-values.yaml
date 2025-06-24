@@ -1,0 +1,8 @@
+projects:
+  - name: demoapp
+    sourceRepos:
+    - https://github.com/manaspradhan007/argocd-release-repo.git
+    destinations:
+    - namespace: demoapp
+      server: '*'
+
