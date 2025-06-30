@@ -1,8 +1,3 @@
-#create cluster namespace:
-locals {
-  domain = var.environment == "prod" ? var.prod_domain : var.dev_domain
-}
-
 resource "helm_release" "argocd" {
   name                = "argo"
   chart               = "argo-cd"

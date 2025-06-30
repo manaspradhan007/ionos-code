@@ -5,14 +5,14 @@ configs:
 server:
   certificate:
     enabled: false
-    secretName: idmedizin-tls
+    secretName: task-tls
   service:
-    type: ClusterIP
-    servicePortHttps: 8080
+    type: LoadBalancer
+    servicePortHttps: 8082
     ports:
       - name: https
-        port: 8080
-        targetPort: 8080
+        port: 8082
+        targetPort: 8082
   resources:
     requests:
       cpu: 500m
@@ -34,10 +34,6 @@ server:
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
       nginx.ingress.kubernetes.io/ssl-passthrough: "true"
       nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    tls:
-    - hosts:
-    - argocd.task.de
-    secretName: argocd-server-tls
 controller:
   resources:
     requests:

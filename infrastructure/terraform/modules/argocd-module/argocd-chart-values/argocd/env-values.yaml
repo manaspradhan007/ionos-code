@@ -1,3 +1,4 @@
+# this is currently not used.
 namespace: argocd
 configs:
   params:
@@ -7,7 +8,7 @@ server:
     enabled: false
     secretName: idmedizin-tls
   service:
-    type: ClusterIP
+    type: LoadBalancer
     servicePortHttps: 8080
     ports:
       - name: https

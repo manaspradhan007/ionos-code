@@ -49,4 +49,12 @@ inputs = {
   #argocd:
   environment          = "${local.env_vars.locals.dev_environment}"
   release_repo_git_access_token = "${get_env("release_repo_git_access_token")}"
+
+  #grafana:
+  monitoring_namespace = "monitor"
+  grafana_hostname = "grafana.task.de"
+
+  promethues_version  = "75.6.1"
+
+  timeout  = 900
 }

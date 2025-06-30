@@ -18,12 +18,12 @@
 
 # }
 
-module "container_registry" {
-  source = "../../resources/container-registry"
-  location                  = var.location
-  registry_name             = var.registry_name
-  api_subnet_allow_list     = var.api_subnet_allow_list
-}
+# module "container_registry" {
+#   source = "../../resources/container-registry"
+#   location                  = var.location
+#   registry_name             = var.registry_name
+#   api_subnet_allow_list     = var.api_subnet_allow_list
+# }
 
 module "namespace" {
   source                = "../../resources/namespace"
