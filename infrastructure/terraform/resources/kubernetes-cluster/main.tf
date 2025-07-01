@@ -19,7 +19,6 @@ resource "ionoscloud_k8s_cluster" "k8s_cluster" {
   }
   nat_gateway_ip = ionoscloud_ipblock.k8sip.ips[0]
   node_subnet = "192.168.0.0/16"
-  public = false
 }
 
 resource "ionoscloud_k8s_node_pool" "nodepool" {
@@ -32,7 +31,7 @@ resource "ionoscloud_k8s_node_pool" "nodepool" {
     time                = "09:00:00Z"
   } 
   auto_scaling {
-    min_node_count      = 3
+    min_node_count      = 4
     max_node_count      = 5
   }
   cpu_family            = "INTEL_XEON"

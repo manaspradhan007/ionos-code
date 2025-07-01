@@ -7,14 +7,14 @@
 #   tags          = var.tags
 # }
 
-# module "env-setup" {
+# module "k8s_cluster" {
 #   source = "../../resources/kubernetes-cluster"
 
-#   region              = var.region
-#   datacenter_name    = var.datacenter_name
-#   location            = var.location
+#   region               = var.region
+#   location             = var.location
+#   datacenter_name      = var.datacenter_name
 #   managed_cluster_name = var.managed_cluster_name
-#   k8s_version         = var.k8s_version
+#   k8s_version          = var.k8s_version
 
 # }
 

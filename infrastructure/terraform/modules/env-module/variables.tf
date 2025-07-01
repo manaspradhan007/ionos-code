@@ -37,11 +37,6 @@ variable "tags" {
 #   type        = string
 # }
 
-# variable "location" {
-#   description = "location of the datacenter, e.g. de/fra"
-#   type        = string
-# }
-
 # variable "managed_cluster_name" {
 #   description = "name of the managed k8s cluster"
 #   type        = string
