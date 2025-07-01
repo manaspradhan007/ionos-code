@@ -16,13 +16,13 @@ build_and_push_image:
   image: alpine/git:latest
 
   rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/task"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
 
   script:
 
     # 1. Log in to the Docker registry
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
+    - echo `docker login task-container-registry.cr.de-fra.ionos.com -u task-test -p $ionos_password`
 
     # 2. Define Docker image tags
     - IMAGE_TAG_SHA=$CI_COMMIT_SHA
@@ -30,7 +30,7 @@ build_and_push_image:
     - IMAGE_TAG_VERSION=""
 
     - |
-      if [ "$CI_COMMIT_BRANCH" == "feat/task" ]; then
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
         IMAGE_TAG_LATEST="latest"
       fi
 
@@ -41,7 +41,8 @@ build_and_push_image:
 
     # 3. Build and push the Docker image
     - docker build -t "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA" .
-    - docker push "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA"
+    - docker tag wordpress:latest task-container-registry.cr.de-fra.ionos.com/wordpress:$IMAGE_TAG_SHA
+    - docker push task-container-registry.cr.de-fra.ionos.com/my-wordpress:$IMAGE_TAG_SHA
 
     - |
       if [ -n "$IMAGE_TAG_LATEST" ]; then
@@ -67,7 +68,7 @@ trivy_scan:
   image: aquasecurity/trivy:latest
   needs: ["build_and_push_image"]
   rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/task"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
   script:
     - echo "Running Trivy scan on $FULL_IMAGE_PATH:$TRIVY_IMAGE_TAG"
     - trivy image --format table --exit-code 1 --severity CRITICAL,HIGH "$FULL_IMAGE_PATH:$TRIVY_IMAGE_TAG"
@@ -80,7 +81,7 @@ terraform_validate_job:
   
   # Define rules for when this job runs
   rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/task"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
     - changes:
         - terraform/**/*
