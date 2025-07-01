@@ -1,3 +1,4 @@
+# Argocd Helm Release Configuration
 resource "helm_release" "argocd" {
   name                = "argo"
   chart               = "argo-cd"

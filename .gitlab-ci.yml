@@ -1,0 +1,109 @@
+
+
+# Define the stages of your pipeline
+stages:
+  - build
+  - scan
+  - validate_terraform
+
+variables:
+  DOCKER_REGISTRY: docker.io
+  FULL_IMAGE_PATH: $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME
+
+# --- Build and Push Docker Image Job ---
+build_and_push_image:
+  stage: build
+  image: alpine/git:latest
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feat/task"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+
+  script:
+
+    # 1. Log in to the Docker registry
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
+
+    # 2. Define Docker image tags
+    - IMAGE_TAG_SHA=$CI_COMMIT_SHA
+    - IMAGE_TAG_LATEST=""
+    - IMAGE_TAG_VERSION=""
+
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "feat/task" ]; then
+        IMAGE_TAG_LATEST="latest"
+      fi
+
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        IMAGE_TAG_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//')
+      fi
+
+    # 3. Build and push the Docker image
+    - docker build -t "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA" .
+    - docker push "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA"
+
+    - |
+      if [ -n "$IMAGE_TAG_LATEST" ]; then
+        docker tag "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA" "$FULL_IMAGE_PATH:$IMAGE_TAG_LATEST"
+        docker push "$FULL_IMAGE_PATH:$IMAGE_TAG_LATEST"
+      fi
+    - |
+      if [ -n "$IMAGE_TAG_VERSION" ]; then
+        docker tag "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA" "$FULL_IMAGE_PATH:$IMAGE_TAG_VERSION"
+        docker push "$FULL_IMAGE_PATH:$IMAGE_TAG_VERSION"
+        MAJOR_MINOR_TAG=$(echo "$IMAGE_TAG_VERSION" | awk -F. '{print $1"."$2}')
+        docker tag "$FULL_IMAGE_PATH:$IMAGE_TAG_SHA" "$FULL_IMAGE_PATH:$MAJOR_MINOR_TAG"
+        docker push "$FULL_IMAGE_PATH:$MAJOR_MINOR_TAG"
+      fi
+
+    - echo "TRIVY_IMAGE_TAG=${IMAGE_TAG_VERSION:-$IMAGE_TAG_SHA}" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+trivy_scan:
+  stage: scan
+  image: aquasecurity/trivy:latest
+  needs: ["build_and_push_image"]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feat/task"'
+  script:
+    - echo "Running Trivy scan on $FULL_IMAGE_PATH:$TRIVY_IMAGE_TAG"
+    - trivy image --format table --exit-code 1 --severity CRITICAL,HIGH "$FULL_IMAGE_PATH:$TRIVY_IMAGE_TAG"
+
+terraform_validate_job:
+  stage: validate_terraform
+  image:
+    # Use a Docker image that has Terraform installed.
+    name: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
+  
+  # Define rules for when this job runs
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feat/task"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+    - changes:
+        - terraform/**/*
+  
+  # Define the working directory for Terraform commands
+  variables:
+    TF_ROOT: infrastructure/terraform/
+
+  script:
+    - echo "Validating Terraform code in $TF_ROOT"
+    - cd $TF_ROOT
+
+    # 1. Initialize Terraform (required for validation, but don't configure backend)
+    - terraform init -backend=false -input=false
+
+    # 2. Check Terraform code formatting
+    - terraform fmt --check --diff || { echo "Terraform code is not formatted. Run 'terraform fmt'."; exit 1; }
+
+    # 3. Validate Terraform syntax and configuration logic
+    - terraform validate || { echo "Terraform validation failed."; exit 1; }
+
+    # 4. Optional: Static Analysis / Linting with TFLint
+    - tflint --enable-all-rules || { echo "TFLint found issues."; exit 1; }
+
+    # 5.Security and Compliance Scanning with Checkov
+    - checkov -d . || { echo "Checkov found security/compliance issues."; exit 1; }

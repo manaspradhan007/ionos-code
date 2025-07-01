@@ -1,3 +1,5 @@
+# This Terraform module deploys Grafana using Helm in a Kubernetes cluster.
+
 #Namespace:
 
 module "namespace" {
@@ -45,34 +47,3 @@ resource "helm_release" "kube_prometheus_stack" {
   wait = true
   timeout = var.timeout
 }
-
-# resource "helm_release" "grafana" {
-#   depends_on = [kubernetes_namespace_v1.monitoring_namespace,kubernetes_secret_v1.grafana_admin_secret]
-#   name       = "grafana"
-#   repository = "https://grafana.github.io/helm-charts"
-#   chart      = "grafana"
-#   version    = var.grafana_version 
-#   namespace  = kubernetes_namespace_v1.monitoring_namespace.metadata[0].name
-
-#   values     = [file("grafana-values.yaml")]
-#   set =  [
-#     {
-#     name  = "adminPasswordFromSecret"
-#     value = kubernetes_secret_v1.grafana_admin_secret.metadata[0].name
-#     },
-#     {
-#     name  = "adminPasswordFromSecretKey"
-#     value = "admin-password"
-#     },
-#     {
-#     name = "ingress.hosts[0]"
-#     value = var.grafana_hostname
-#     },
-#     { 
-#     name = "ingress.enabled"
-#     value = true
-#     }
-#   ]
-#   wait = true
-#   timeout = var.timeout 
-# }

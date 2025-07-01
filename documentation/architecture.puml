@@ -1,0 +1,82 @@
+@startuml
+!theme plain
+skinparam componentStyle rectangle
+
+cloud "Internet / External Client" as internet
+
+node "Kubernetes Cluster" {
+
+  component "Ingress Controller" as ingress_controller {
+    interface "Host: argocd.task.de\nPath: /" as argocd_ingress_ep
+    interface "Host: grafana.task.de\nPath: /" as grafana_ingress_ep
+    interface "Host: wordpress.task.de\nPath: /" as wp_ingress_ep
+  }
+
+  folder "ArgoCD Namespace" as argocd_ns {
+    component "ArgoCD Server" as argocd
+    interface "ArgoCD Service" as argocd_svc
+  }
+
+  folder "WordPress Namespace" as wp_ns {
+    component "WordPress Application" as wp_app {
+      component "Nginx" as wp_nginx
+      component "PHP-FPM" as wp_php_fpm
+    }
+    database "MySQL Database" as mysql_db
+
+    component "Nginx Exporter" as nginx_exporter
+    component "PHP-FPM Exporter" as phpfpm_exporter
+    component "MySQL Exporter" as mysql_exporter
+  }
+
+  folder "Monitoring Namespace" as monitoring_ns {
+    component "Prometheus" as prometheus
+    component "Grafana" as grafana
+    component "Prometheus Operator" as prom_operator
+  }
+
+  component "Kubernetes API Server" as k8s_api
+}
+
+' External Access Flows '
+internet --> argocd_ingress_ep : Accesses
+internet --> grafana_ingress_ep : Accesses
+internet --> wp_ingress_ep : Accesses
+
+' Ingress Routing '
+argocd_ingress_ep --|> argocd_svc
+argocd_svc -- argocd : Routes Traffic
+
+grafana_ingress_ep -- Grafana : Routes Traffic
+
+wp_ingress_ep -- wp_nginx : Routes Traffic
+
+' Application Internal Flows '
+wp_nginx --> wp_php_fpm : Serves PHP requests
+wp_php_fpm --> mysql_db : DB Queries
+
+' Monitoring Flows '
+prometheus -down-> nginx_exporter : Scrapes metrics (HTTP Pull)
+prometheus -down-> phpfpm_exporter : Scrapes metrics (HTTP Pull)
+prometheus -down-> mysql_exporter : Scrapes metrics (HTTP Pull)
+
+nginx_exporter -- wp_nginx : Collects metrics (localhost)
+phpfpm_exporter -- wp_php_fpm : Collects metrics (localhost)
+mysql_exporter --> mysql_db : Collects metrics (DB connection)
+
+grafana --> prometheus : Queries metrics (PromQL)
+
+' GitOps & Control Plane Interactions '
+argocd --> k8s_api : Syncs K8s resources (GitOps)
+prom_operator --> k8s_api : Manages Prometheus/Alertmanager CRDs
+
+' Implicit K8s Management '
+k8s_api <--> argocd_svc : Service Discovery
+k8s_api <--> wp_nginx : Pod/Service Management
+k8s_api <--> mysql_db : Pod/Service Management
+k8s_api <--> prometheus : Pod/Service Management
+k8s_api <--> grafana : Pod/Service Management
+k8s_api <--> nginx_exporter : Pod/Service Management
+k8s_api <--> phpfpm_exporter : Pod/Service Management
+k8s_api <--> mysql_exporter : Pod/Service Management
+@enduml

@@ -27,34 +27,33 @@ inputs = {
   # force_destroy = true
 
   #k8s:
-  region                = "${local.region_vars.locals.region}"
-  datacenter_name       = "task-dcd1"
-  location              = "de/fra"
-  managed_cluster_name  = "task-cluster"
-  k8s_version           =  "1.32.5"
+  region               = "${local.region_vars.locals.region}"
+  datacenter_name      = "task-dcd1"
+  location             = "de/fra"
+  managed_cluster_name = "task-cluster"
+
 
   location              = "de/fra"
   registry_name         = "task-container-registry"
   api_subnet_allow_list = []
 
-  #helm-resources:
-
-  nginx_version        = "4.12.2"
-
-
   #namespace:
-  cluster_name         = "task-cluster"
+  cluster_name          = "task-cluster"
   kubernetes_namespaces = ["demoapp"]
 
   #argocd:
-  environment          = "${local.env_vars.locals.dev_environment}"
+  environment                   = "${local.env_vars.locals.dev_environment}"
   release_repo_git_access_token = "${get_env("release_repo_git_access_token")}"
 
   #grafana:
   monitoring_namespace = "monitor"
-  grafana_hostname = "grafana.task.de"
+  grafana_hostname     = "grafana.task.de"
 
-  promethues_version  = "75.6.1"
+  timeout = 900
 
-  timeout  = 900
+
+  #version inputs:
+  k8s_version        = "1.32.5"
+  nginx_version      = "4.12.2"
+  promethues_version = "75.6.1"
 }

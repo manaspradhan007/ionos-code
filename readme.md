@@ -40,16 +40,3 @@ Issues:
   │    7: resource "ionoscloud_ipblock" "k8sip" {
 
   │ 
-
-  * Failed to execute "terraform apply" in ./.terragrunt-cache/kr93K7_rrE8n27VJuyxjnBVoi9g/iikTA8C0_1gOjSXoi2fAi5twB_w/modules/env-module
-  ╷
-  │ Error: installation failed
-  │ 
-  │   with module.grafana.helm_release.kube_prometheus_stack,
-  │   on ../../resources/grafana/main.tf line 32, in resource "helm_release" "kube_prometheus_stack":
-  │   32: resource "helm_release" "kube_prometheus_stack" {
-  │ 
-  │ cannot re-use a name that is still in use
-  ╵
-  
-  exit status 1

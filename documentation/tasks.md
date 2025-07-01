@@ -20,9 +20,9 @@ Bonus
 - make it a WordPress application
 
 
-# Setup Frontend App on IONOS Cloud
+# Setup App on IONOS Cloud
 
-- setup S3- Object storage: Create access keys, create a bucket
+- setup S3- Object storage: Create access keys, create a bucket - [X]
 - Setup Terragrunt: &#x2713; ✅
 - Setup Terraform: &#x2713; ✅
 - Create Kubernetes cluster: Manually &#x2713; ✅
@@ -30,8 +30,10 @@ Bonus
 - Create Container registry: &#x2713; ✅
 - Secret to read from CR.
 - Deploy nginx app : ✅
-- Setup ingress controller 
+- Setup ingress controller : ✅
 - setup cert-manager : NA
 - Deploy nginx app : ✅
-
-This is a checked item: ✓ or ✔ or ✅ or - [x]
+- Deploy Grafana/Prometheus: ✅
+- Deploy ARGOCD app and sync with repo: ✅
+- Write CI pipeline code: ✅
+- Documentation: ✅
