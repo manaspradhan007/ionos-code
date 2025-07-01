@@ -11,6 +11,7 @@ generate "provider" {
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 terraform {
+  required_version = "~> 1.11.1"
   required_providers {
     ionoscloud = {
       source = "ionos-cloud/ionoscloud"
@@ -19,47 +20,50 @@ terraform {
     kubernetes = {
        source  = "hashicorp/kubernetes"
        version = "~> 2"
-     }
-     helm = {
-       source  = "hashicorp/helm"
-       version = ">= 2.7"
-     }
-     kubectl = {
+    }
+    kubectl = {
       source  = "gavinbunney/kubectl"
       version = ">= 1.7.0"
     }
-    argocd = {
-      source = "argoproj-labs/argocd"
-      version = "~> 7.0"
+    helm = {
+      source = "hashicorp/helm"
+      version = ">=3.0.2"
     }
   }
 }
-provider "ionoscloud" {
-  token = "${get_env("IONOS_TOKEN", "default_or_error_if_not_set")}" # Use environment variable for security
-  region = "eu-central-3"
-}
+provider "ionoscloud" {}
 provider "kubernetes" {
   config_context = "${local.kubernetes_config_context}"
   config_path    = "~/.kube/config"
 }
 provider "helm" {
-  kubernetes {
-    config_context = "${local.kubernetes_config_context}"
+  kubernetes = {
     config_path    = "~/.kube/config"
   }
 }
-terraform {
-  backend "s3" {
-    bucket              = "tfstatefile"
-    key                 = "${path_relative_to_include()}/infrastate.tfstate"
-    region              = "eu-central-3"
-    endpoint            = "s3.eu-central-3.ionoscloud.com"
-    access_key          = "${get_env("access_key")}"       # It's better to use environment variables!
-    secret_key          = "${get_env("secret_key")}"       # It's better to use environment variables!
-    force_path_style    = true                           # Required for some S3-compatible services
-    encrypt             = true                             # Optional: Encrypts the state file at rest
-  }
+provider "aws" {
+  region                      = "de"
+  access_key                  = "${get_env("access_key")}"
+  secret_key                  = "${get_env("secret_key")}"
+  skip_credentials_validation = true
+  skip_requesting_account_id  = true
+  skip_region_validation      = true
+  endpoints = "https://s3-eu-central-3.ionoscloud.com"
 }
+# terraform {
+#   backend "s3" {
+#     bucket              = "statebucketstore"
+#     key                 = "${path_relative_to_include()}/infrastate.tfstate"
+#     region              = "eu-central-3"
+#     endpoints = {
+#       s3  = "https://s3-eu-central-3.ionoscloud.com"
+#     }
+#     use_path_style    = true                             
+#     encrypt             = true     
+#     skip_credentials_validation = true
+#     skip_requesting_account_id  = true
+#   }
+# }
 EOF
 }
 inputs = merge(

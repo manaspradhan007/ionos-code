@@ -1,0 +1,70 @@
+# General settings
+fullnameOverride: kube-prometheus-stack
+
+# Prometheus specific configurations
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {} 
+    retention: 7d
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "ionos-enterprise-ssd"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+  ingress:
+    enabled: false
+    ingressClassName: nginx
+# Grafana specific configurations
+grafana:
+  enabled: true
+  admin:
+    existingSecret: grafana-admin-secret
+    passwordKey: admin-password
+  persistence:
+    enabled: true
+    type: pvc
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+    storageClassName: "ionos-enterprise-ssd"
+
+  service:
+    type: LoadBalancer
+    port: 8090 
+    targetPort: 3000
+  ingress:
+    enabled: false
+    ingressClassName: nginx
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "ionos-enterprise-ssd"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+  ingress:
+    enabled: false
+    ingressClassName: nginx
+kube-state-metrics:
+  enabled: true
+nodeExporter:
+  enabled: true
+prometheusOperator:
+  enabled: true

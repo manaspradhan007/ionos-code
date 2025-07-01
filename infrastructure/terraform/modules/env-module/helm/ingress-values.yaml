@@ -1,0 +1,6 @@
+controller:
+  replicaCount: 2
+  tolerations: 
+  - key: "ingress-only"
+    operator: "Exists"
+    effect: "NoSchedule"
