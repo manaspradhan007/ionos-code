@@ -39,7 +39,7 @@ inputs = {
 
   #namespace:
   cluster_name          = "task-cluster"
-  kubernetes_namespaces = ["demoapp","nginx"]
+  kubernetes_namespaces = ["nginx"]
 
   #argocd:
   environment                   = "${local.env_vars.locals.dev_environment}"

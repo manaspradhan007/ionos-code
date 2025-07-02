@@ -148,21 +148,21 @@ The diagram is defined using [PlantUML](https://plantuml.com/), which allows for
 
 1. External Access (Users/Developers):
 
-Users access your DemoApp (WordPress) via its dedicated domain (e.g., wordpress.task.de) which points to the Ingress Controller.
+Users access your nginx-prometheus (WordPress) via its dedicated domain (e.g., wordpress.task.de) which points to the Ingress Controller.
 Users access Grafana via its dedicated domain (e.g., grafana.task.de) which also points to the Ingress Controller.
 Developers access ArgoCD UI via its dedicated domain (e.g., argocd.task.de) which also points to the Ingress Controller.
 
 2. Ingress Controller:
 
 Acts as the entry point to your cluster.
-Based on the Host header (domain name) and Path in the incoming HTTP/HTTPS request, it routes traffic to the correct Kubernetes Service (e.g., DemoApp Service, Grafana Service, ArgoCD Service).
+Based on the Host header (domain name) and Path in the incoming HTTP/HTTPS request, it routes traffic to the correct Kubernetes Service (e.g., nginx-prometheus Service, Grafana Service, ArgoCD Service).
 
 3. Kubernetes Services:
 
 Provide a stable network endpoint for your applications.
 They load-balance traffic across the healthy Pods that match their selector labels.
 
-4. Application Pods (DemoApp - WordPress Example):
+4. Application Pods (nginx-prometheus - WordPress Example):
 
 Your WordPress application runs in Pods. A typical setup includes:
 Nginx Container: Serves static files and proxies dynamic requests to PHP-FPM.
